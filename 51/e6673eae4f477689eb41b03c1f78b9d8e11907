@@ -1,0 +1,22 @@
+src/tomlc17.c
+  s_dae2be791e3609::t_8b2bdf3f87fcab 574
+  s_dae2be791e3609::t_c377192ee867b4 419-420
+  s_dae2be791e3609::t_859c938a9472fa 417-418
+  s_dae2be791e3609::t_97c468d1583c8e 568
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "51e6673eae4f477689eb41b03c1f78b9d8e11907",
+  "prompts": {},
+  "sessions": {
+    "s_dae2be791e3609": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba0122f8-73f5-4608-8ada-1a4986886121",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
