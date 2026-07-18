@@ -107,7 +107,7 @@ static page_t *page_create(int size) {
   if (!(0 <= size && size <= (1 << 30))) { // [0..1GB]
     return NULL;
   }
-  size_t totalsz = (size_t) & ((page_t *)0)->data[size];
+  size_t totalsz = (size_t)&((page_t *)0)->data[size];
   page_t *page = MALLOC(totalsz);
   if (!page) {
     return NULL;
@@ -598,6 +598,8 @@ static int datum_copy(toml_datum_t *dst, toml_datum_t src, srcmap_t *sm,
   dst->flag = src.flag;
   switch (src.type) {
   case TOML_STRING:
+    // String bytes live in src's pool; copy them into dst's pool so dst
+    // stays independently owned.
     dst->u.str.ptr = pool_alloc(sm->pool, src.u.str.len + 1);
     if (!dst->u.str.ptr) {
       *reason = "out of memory";
@@ -607,6 +609,8 @@ static int datum_copy(toml_datum_t *dst, toml_datum_t src, srcmap_t *sm,
     memcpy((char *)dst->u.str.ptr, src.u.str.ptr, src.u.str.len + 1);
     break;
   case TOML_TABLE:
+    // Recreate each entry in dst: the key bytes are pool-copied (like a
+    // string value), and the value is deep-copied recursively.
     for (int i = 0; i < src.u.tab.size; i++) {
       char *keycopy = pool_alloc(sm->pool, src.u.tab.len[i] + 1);
       if (!keycopy) {
@@ -625,6 +629,7 @@ static int datum_copy(toml_datum_t *dst, toml_datum_t src, srcmap_t *sm,
     }
     break;
   case TOML_ARRAY:
+    // Deep-copy each element into a freshly emplaced slot in dst.
     for (int i = 0; i < src.u.arr.size; i++) {
       toml_datum_t *pelem = arr_emplace(dst, reason);
       if (!pelem) {
@@ -636,6 +641,8 @@ static int datum_copy(toml_datum_t *dst, toml_datum_t src, srcmap_t *sm,
     }
     break;
   default:
+    // Every other type (int, float, bool, timestamp, invalid) is a plain
+    // value with no pool-owned pointers, so a struct copy is a full copy.
     *dst = src;
     break;
   }
