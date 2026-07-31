@@ -539,8 +539,11 @@ static void datum_free(toml_datum_t *datum) {
 }
 
 // Maps each distinct source-name pointer to a single copy in the destination
-// pool (deduplicated), so the merged pool holds at most one copy of each source
-// name.
+// pool (deduplicated), so the merged pool holds at most one copy per distinct
+// source pointer. Dedup is by pointer identity, not string content: every
+// datum from one parse shares one source pointer (set_source_recursive), so
+// dedup is exact within a tree, but two trees with content-identical source
+// names (e.g. the same filename parsed twice) still get separate copies.
 typedef struct srcmap_t srcmap_t;
 struct srcmap_t {
   pool_t *pool;
@@ -556,6 +559,9 @@ static const char *dedup_source(srcmap_t *m, const char *src) {
   if (!src) {
     return NULL;
   }
+  // Pointer-identity match (see srcmap_t above). The scan is O(n) in the
+  // number of distinct source pointers seen so far, not in the (much
+  // larger) number of datums, since repeats short-circuit here.
   for (int i = 0; i < m->n; i++) {
     if (m->olds[i] == src) {
       return m->news[i];
@@ -832,6 +838,10 @@ toml_result_t toml_merge(const toml_result_t *r1, const toml_result_t *r2) {
     reason = "out of memory";
     goto bail;
   }
+  // sm is scoped to this single merge call: its olds[]/news[] memo arrays
+  // are just bookkeeping to dedup source-name pointers while copying below,
+  // and are freed once the copy/merge is done. The deduplicated string
+  // copies they produced live on in `pool`, which becomes the result's pool.
   sm.pool = pool;
 
   // Make a copy of r1
