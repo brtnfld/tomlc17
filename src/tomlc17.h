@@ -124,7 +124,7 @@ struct toml_result_t {
  * @brief Parse a TOML document from a string.
  *
  * @param src A string containing the TOML document.
- * @param len The length of the string.
+ * @param len The length of the string, excluding NUL terminator.
  * @return A toml_result_t structure. Must be freed with toml_free().
  */
 TOML_EXTERN toml_result_t toml_parse(const char *src, int len);
@@ -133,7 +133,7 @@ TOML_EXTERN toml_result_t toml_parse(const char *src, int len);
  * @brief Parse a TOML document, tagging every datum with a source name.
  *
  * @param src A string containing the TOML document.
- * @param len The length of the string.
+ * @param len The length of the string, excluding NUL terminator.
  * @param name A source name (e.g. filename) copied into the result, or NULL.
  *             Every parsed datum's `source` is set to this name (or NULL).
  * @return A toml_result_t structure. Must be freed with toml_free().

@@ -151,8 +151,8 @@ struct toml_option_t {
 toml_result_t toml_parse(const char *src, int len);
 ```
 
-Parse a TOML document from a string. `len` is the length of `src`.
-The result must be released with `toml_free()`.
+Parse a TOML document from a string. `len` is the length of `src`, excluding
+NUL terminator. The result must be released with `toml_free()`.
 
 ---
 
