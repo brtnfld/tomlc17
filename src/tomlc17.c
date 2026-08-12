@@ -333,8 +333,8 @@ struct token_t {
 
 // Scanner object
 struct scanner_t {
-  const char *src;  // src[] is a NUL-terminated string
-  const char *endp; // end of src[]. always pointing at a NUL char.
+  const char *src;  // src[]
+  const char *endp; // end of src[], i.e. src + len
   const char *cur;  // current char in src[]
   int lineno;       // line number of current char
   const char *line_start;
@@ -1070,13 +1070,6 @@ toml_result_t toml_parse_named(const char *src, int len, const char *name) {
   // Check that src is not NULL.
   if (!src) {
     snprintf(result.errmsg, sizeof(result.errmsg), "src is NULL");
-    goto bail;
-  }
-
-  // Check that src is NUL terminated.
-  if (src[len]) {
-    snprintf(result.errmsg, sizeof(result.errmsg),
-             "src[] must be NUL terminated");
     goto bail;
   }
 
@@ -2055,7 +2048,6 @@ static void scan_init(scanner_t *sp, const char *src, int len, char *errbuf,
   memset(sp, 0, sizeof(*sp));
   sp->src = src;
   sp->endp = src + len;
-  assert(*sp->endp == '\0');
   sp->cur = src;
   sp->lineno = 1;
   sp->line_start = src;
