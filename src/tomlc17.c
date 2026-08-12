@@ -993,17 +993,15 @@ toml_result_t toml_parse_file_named(FILE *fp, const char *name) {
   enum { CHUNKSZ = 8 * 1024 }; // bytes to read per iteration
 
   // Read file into memory. cell_realloc handles capacity growth, so we only
-  // need to ask for room for one more chunk (plus a terminating NUL) each pass.
-  // Drive the loop off fread's return value rather than feof(): feof() only
-  // reports true after a read has already hit EOF, and this also guarantees buf
-  // is allocated at least once before the NUL terminator below.
+  // need to ask for room for one more chunk each pass. Drive the loop off
+  // fread's return value rather than feof(): feof() only reports true after
+  // a read has already hit EOF.
   for (;;) {
-    if (top > INT_MAX - CHUNKSZ - 1) {
+    if (top > INT_MAX - CHUNKSZ) {
       snprintf(result.errmsg, sizeof(result.errmsg), "file is too big");
       break;
     }
-    // add 1 to CHUNKSZ so we always have room for terminating NUL.
-    char *tmp = cell_realloc(buf, top + CHUNKSZ + 1);
+    char *tmp = cell_realloc(buf, top + CHUNKSZ);
     if (!tmp) {
       snprintf(result.errmsg, sizeof(result.errmsg), "out of memory");
       break;
@@ -1030,8 +1028,6 @@ toml_result_t toml_parse_file_named(FILE *fp, const char *name) {
     cell_free(buf);
     return result;
   }
-  buf[top] = 0; // NUL terminator
-
   result = toml_parse_named(buf, top, name);
   cell_free(buf);
   return result;
