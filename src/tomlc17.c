@@ -1069,6 +1069,15 @@ toml_result_t toml_parse_named(const char *src, int len, const char *name) {
     goto bail;
   }
 
+  // A UTF-8 BOM at the very start is an encoding artifact rather than content,
+  // so drop it before scanning. Everywhere else U+FEFF stays exactly as it is
+  // and remains an error, which is what bom-not-at-start expects.
+  if (len >= 3 && (unsigned char)src[0] == 0xEF && (unsigned char)src[1] == 0xBB &&
+      (unsigned char)src[2] == 0xBF) {
+    src += 3;
+    len -= 3;
+  }
+
   // If user insists, check that src[] is a valid utf8 string.
   if (toml_option.check_utf8) {
     int line = 1; // keeps track of line number
@@ -2867,7 +2876,7 @@ static bool is_unicode_bare_key_char(uint32_t cp) {
   if (0xF900 <= cp && cp <= 0xFDCF)
     return true;
   if (0xFDF0 <= cp && cp <= 0xFFFD)
-    return true;
+    return cp != 0xFEFF; // BOM: stripped when leading, an error anywhere else
   if (0x10000 <= cp && cp <= 0xEFFFF)
     return true;
   return false;
