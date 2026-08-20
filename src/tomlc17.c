@@ -1072,8 +1072,8 @@ toml_result_t toml_parse_named(const char *src, int len, const char *name) {
   // A UTF-8 BOM at the very start is an encoding artifact rather than content,
   // so drop it before scanning. Everywhere else U+FEFF stays exactly as it is
   // and remains an error, which is what bom-not-at-start expects.
-  if (len >= 3 && (unsigned char)src[0] == 0xEF && (unsigned char)src[1] == 0xBB &&
-      (unsigned char)src[2] == 0xBF) {
+  if (len >= 3 && (unsigned char)src[0] == 0xEF &&
+      (unsigned char)src[1] == 0xBB && (unsigned char)src[2] == 0xBF) {
     src += 3;
     len -= 3;
   }
