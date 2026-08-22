@@ -2672,7 +2672,10 @@ static int scan_float(scanner_t *sp, token_t *tok) {
   errno = 0;
   char *q;
   double fp64 = strtod(buffer, &q);
-  if (errno || *q || q == buffer) {
+  // glibc sets ERANGE on underflow even when strtod's result is correctly
+  // rounded, e.g. 5e-324; allow acceptance of such subnormal results.
+  int is_ok_subnormal = (errno == ERANGE) && fp64 != 0.0 && isfinite(fp64);
+  if ((errno && !is_ok_subnormal) || *q || q == buffer) {
     return SETERROR(sp->ebuf, lineno, "error parsing float");
   }
 
