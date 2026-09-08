@@ -6,6 +6,7 @@ ifdef DEBUG
 else
     CFLAGS += -O3 -DNDEBUG
 endif
+CFLAGS += $(EXTRA_CFLAGS)
 
 CXXFLAGS = $(subst -std=c17,-std=c++20,$(CFLAGS))
 

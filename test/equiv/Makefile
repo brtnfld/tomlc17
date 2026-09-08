@@ -1,6 +1,7 @@
 CFLAGS := -O0 -g -fsanitize=address,undefined -std=c17 -Wmissing-declarations -Wall -Wextra -MMD
 
 EXEC = test1
+CFLAGS += $(EXTRA_CFLAGS)
 
 all: $(EXEC)
 

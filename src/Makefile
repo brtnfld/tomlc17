@@ -27,6 +27,7 @@ endif
 ifneq ($(OS), Windows_NT)
     CFLAGS += -fpic
 endif
+CFLAGS += $(EXTRA_CFLAGS)
 
 
 all: $(EXEC) $(LIB) $(LIB_SHARED) 

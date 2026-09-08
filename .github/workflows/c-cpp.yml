@@ -29,6 +29,27 @@ jobs:
       run: make install prefix=./tmp
 
 
+  # scan_float() must not depend on floating-point semantics a fast-math
+  # build is free to change: such builds may assume no operand is subnormal
+  # and every operand is finite, which is what broke the subnormal check
+  # under Intel icx -fp-model=fast (issue #49, PR #50).  -ffast-math is the
+  # closest gcc equivalent, and it also sets FTZ+DAZ at process start, so
+  # this job covers the run-time flags as well as the compile-time ones.
+  build-ubuntu-fastmath:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
+      with:
+        cache: false
+    - name: install toml-test
+      run: go install github.com/toml-lang/toml-test/v2/cmd/toml-test@latest
+    - name: make clean all
+      run: make clean all EXTRA_CFLAGS="-ffast-math"
+    - name: make test
+      run: make test EXTRA_CFLAGS="-ffast-math"
+
   build-macos:
     runs-on: macos-latest
   

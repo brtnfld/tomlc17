@@ -12,6 +12,7 @@ endif
 ifneq ($(OS), Windows_NT)
     CFLAGS += -fpic
 endif
+CFLAGS += $(EXTRA_CFLAGS)
 
 CXXFLAGS = $(subst -std=c17,-std=c++20,$(CFLAGS))
 
